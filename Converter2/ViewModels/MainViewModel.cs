@@ -39,10 +39,6 @@ namespace Converter2.ViewModels
         public async Task Convert(string input, string output, Preset preset, FormatEnum format)
         {
             await _service.ConvertAsync(input, output, preset, format);
-            //test 123
-            //test 123
-            //test 12313131
-            //test 12313131
         }
     }
 }
