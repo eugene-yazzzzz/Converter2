@@ -17,7 +17,11 @@ namespace Converter2.Services.Converters
                 var fromExt = Path.GetExtension(input).ToLower();
                 var toExt = Path.GetExtension(output).ToLower();
 
-                if (fromExt == ".docx" && toExt == ".pdf")
+                if (fromExt == ".txt")
+                {
+                    ConvertTxtToDocument(input, output, toExt);
+                }
+                else if (fromExt == ".docx" && toExt == ".pdf")
                 {
                     ConvertDocxToPdf(input, output);
                 }
@@ -29,15 +33,35 @@ namespace Converter2.Services.Converters
                 {
                     ConvertPdfToTxt(input, output);
                 }
-                else if (fromExt == ".txt" && toExt == ".pdf")
-                {
-                    ConvertTxtToPdf(input, output);
-                }
                 else
                 {
                     throw new NotSupportedException($"Конвертация {fromExt} → {toExt} не поддерживается.");
                 }
             });
+        }
+
+        private void ConvertTxtToDocument(string input, string output, string format)
+        {
+            var doc = new Document();
+            doc.LoadFromFile(input, FileFormat.Txt);
+
+            switch (format)
+            {
+                case ".pdf":
+                    doc.SaveToFile(output, FileFormat.PDF);
+                    break;
+                case ".docx":
+                    doc.SaveToFile(output, FileFormat.Docx);
+                    break;
+                case ".doc":
+                    doc.SaveToFile(output, FileFormat.Doc);
+                    break;
+                case ".html":
+                    doc.SaveToFile(output, FileFormat.Html);
+                    break;
+                default:
+                    throw new NotSupportedException($"Формат {format} не поддерживается.");
+            }
         }
 
         private void ConvertDocxToPdf(string input, string output)
@@ -64,15 +88,10 @@ namespace Converter2.Services.Converters
             }
             File.WriteAllText(output, sb.ToString());
         }
-
-        private void ConvertTxtToPdf(string input, string output)
+        public IEnumerable<string> OutputFormats => new List<string>
         {
-            var text = File.ReadAllText(input);
-            var doc = new Document();
-            var section = doc.AddSection();
-            var paragraph = section.AddParagraph();
-            paragraph.AppendText(text);
-            doc.SaveToFile(output, FileFormat.PDF);
-        }
+            "PDF", "DOCX", "DOC", "XLS", "XLSX", "PPT", "PPTX",
+            "JPG", "PNG", "HTML", "JPEG", "TXT"
+        };
     }
 }

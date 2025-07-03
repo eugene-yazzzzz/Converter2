@@ -160,7 +160,36 @@ namespace Converter2.ViewModels
                     ["Quality"] = "Standard",
                     ["CompressImages"] = true
                 }
+            },
+            new()
+            {
+                Name = "TXT to Image",
+                Format = ".jpg",
+                Settings = new Dictionary<string, object>
+                {
+                    ["Resize"] = true,
+                    ["Width"] = 1280,
+                    ["Height"] = 720,
+                    ["FontFamily"] = "Arial",
+                    ["FontSize"] = 24
+                }
+            },
+            new()
+            {
+                Name = "TXT to Spreadsheet",
+                Format = ".xlsx",
+                Settings = new Dictionary<string, object>()
+            },
+            new()
+            {
+                Name = "TXT to Presentation",
+                Format = ".pptx",
+                Settings = new Dictionary<string, object>()
             }
         };
+        public async Task Convert(string input, string output, Preset preset, FormatEnum format)
+        {
+            await _service.ConvertAsync(input, output, preset, format);
+        }
     }
 }

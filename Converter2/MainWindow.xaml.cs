@@ -28,8 +28,15 @@ namespace Converter2
             [".mp4"] = new() { ".avi", ".mov", ".mkv" },
             [".avi"] = new() { ".mp4", ".mov" },
             [".pdf"] = new() { ".docx" },
-            [".docx"] = new() { ".pdf", ".txt" },
-            [".txt"] = new() { ".pdf", ".docx" },
+            [".docx"] = new() { ".pdf", ".txt", ".html", ".rtf" },
+            [".txt"] = new() { 
+            ".pdf", ".docx", ".doc", ".html",
+            ".xls", ".xlsx", ".csv",
+            ".ppt", ".pptx",
+            ".jpg", ".png", ".jpeg", ".bmp", ".webp",
+            ".rtf", ".odt"
+        },
+
         };
 
         public MainWindow()
@@ -81,6 +88,10 @@ namespace Converter2
                 Preset preset = FindPresetForExtension(selectedExt) ?? CreateDefaultPreset(selectedExt);
 
                 await _conversionService.ConvertAsync(_inputFilePath, outputPath, preset, format);
+                if (format == FormatEnum.Document || format == FormatEnum.Spreadsheet || format == FormatEnum.Presentation)
+                {
+                    RemoveSpireDocWarning(outputPath);
+                }
                 MessageBox.Show($"Конвертация завершена: {outputPath}", "Успех");
             }
             catch (Exception ex)
@@ -112,9 +123,24 @@ namespace Converter2
                 ".jpg" or ".jpeg" or ".png" or ".bmp" or ".webp" or ".tiff" or ".tif" or ".gif" => FormatEnum.Image,
                 ".mp3" or ".wav" or ".flac" or ".aac" => FormatEnum.Audio,
                 ".mp4" or ".avi" or ".mov" or ".mkv" => FormatEnum.Video,
-                ".pdf" or ".docx" or ".txt" => FormatEnum.Document,
+                ".pdf" or ".docx" or ".doc" or ".txt" or ".rtf" or ".odt" or ".html" => FormatEnum.Document,
+                ".xls" or ".xlsx" or ".csv" or ".ods" => FormatEnum.Spreadsheet,
+                ".ppt" or ".pptx" or ".odp" => FormatEnum.Presentation,
                 _ => throw new NotSupportedException($"Неизвестное расширение: {ext}")
             };
+        }
+        private void RemoveSpireDocWarning(string filePath)
+        {
+            try
+            {
+                string content = File.ReadAllText(filePath);
+                content = content.Replace("Evaluation Warning: The document was created with Spire.Doc for .NET.", "");
+                File.WriteAllText(filePath, content);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Не удалось удалить предупреждение Spire.Doc: {ex.Message}");
+            }
         }
     }
 }

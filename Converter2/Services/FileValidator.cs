@@ -14,14 +14,18 @@ namespace Converter2.Services
         { ".mp3", new() { new byte[] {0xFF,0xFB}, new byte[] {0x49,0x44,0x33}}},
         { ".wav", new() { new byte[] {0x52,0x49,0x46,0x46}}},
         { ".jpg", new() { new byte[] {0xFF,0xD8,0xFF}}},
+        { ".jpeg", new() { new byte[] {0xFF,0xD8,0xFF}} },
         { ".png", new() { new byte[] {0x89,0x50,0x4E,0x47}}},
-        // Другие форматы по аналогии
+        { ".txt", new() } 
     };
 
         public static bool Validate(string filePath)
         {
             var ext = Path.GetExtension(filePath).ToLower();
             if (!_signatures.ContainsKey(ext)) return false;
+
+            // Для TXT всегда возвращаем true
+            if (ext == ".txt") return true;
 
             var signatures = _signatures[ext];
             var longest = signatures.Max(s => s.Length);

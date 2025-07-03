@@ -11,7 +11,9 @@ namespace Converter2.Models
         Image,
         Audio,
         Video,
-        Document
+        Document,
+        Spreadsheet,
+        Presentation
     }
 
 }
