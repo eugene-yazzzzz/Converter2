@@ -9,10 +9,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\Converters\SvgEncoder.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FFmpeg.AutoGen" Version="7.1.1" />
     <PackageReference Include="FreeSpire.Doc" Version="12.2.0" />
     <PackageReference Include="PdfPig" Version="0.1.10" />
+    <PackageReference Include="PdfSharp" Version="6.2.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.10" />
+    <PackageReference Include="SixLabors.ImageSharp.Web" Version="3.1.5" />
+    <PackageReference Include="Svg" Version="3.4.7" />
   </ItemGroup>
 
 </Project>

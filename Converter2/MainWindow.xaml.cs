@@ -1,25 +1,28 @@
 ﻿using Converter2.Models;
 using Converter2.Services;
+using Converter2.ViewModels;
 using System.IO;
 using Microsoft.Win32;
 using System.Windows;
 
-
 namespace Converter2
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         private string _inputFilePath;
-        private string _outputExtension;
         private readonly ConversionService _conversionService = new();
+        private readonly MainViewModel _viewModel = new MainViewModel();
 
         private readonly Dictionary<string, List<string>> SupportedConversions = new()
         {
-            [".jpg"] = new() { ".png", ".bmp", ".webp" },
-            [".png"] = new() { ".jpg", ".bmp", ".webp" },
+            [".jpg"] = new() { ".png", ".bmp", ".webp", ".tiff", ".gif" },
+            [".jpeg"] = new() { ".png", ".bmp", ".webp", ".tiff", ".gif" },
+            [".png"] = new() { ".jpg", ".jpeg", ".bmp", ".webp", ".tiff", ".gif" },
+            [".bmp"] = new() { ".jpg", ".jpeg", ".png", ".webp", ".tiff", ".gif" },
+            [".webp"] = new() { ".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".gif" },
+            [".tiff"] = new() { ".jpg", ".jpeg", ".png", ".bmp", ".webp", ".gif" },
+            [".tif"] = new() { ".jpg", ".jpeg", ".png", ".bmp", ".webp", ".gif" },
+            [".gif"] = new() { ".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tiff" },
             [".mp3"] = new() { ".wav", ".flac", ".aac" },
             [".wav"] = new() { ".mp3", ".flac" },
             [".mp4"] = new() { ".avi", ".mov", ".mkv" },
@@ -75,20 +78,9 @@ namespace Converter2
             try
             {
                 FormatEnum format = GetFormatByExtension(selectedExt);
-
-                // Простой пресет-заглушка
-                var preset = new Preset
-                {
-                    Name = "Auto",
-                    Format = selectedExt,
-                    Settings = new Dictionary<string, object>
-                    {
-                        { "Arguments", $"-i \"{{input}}\" \"{{output}}\"" } // минимальный ffmpeg шаблон
-                    }
-                };
+                Preset preset = FindPresetForExtension(selectedExt) ?? CreateDefaultPreset(selectedExt);
 
                 await _conversionService.ConvertAsync(_inputFilePath, outputPath, preset, format);
-
                 MessageBox.Show($"Конвертация завершена: {outputPath}", "Успех");
             }
             catch (Exception ex)
@@ -97,11 +89,27 @@ namespace Converter2
             }
         }
 
+        private Preset? FindPresetForExtension(string extension)
+        {
+            return _viewModel.Presets.FirstOrDefault(p =>
+                p.Format.Equals(extension, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private Preset CreateDefaultPreset(string extension)
+        {
+            return new Preset
+            {
+                Name = "Default",
+                Format = extension,
+                Settings = new Dictionary<string, object>()
+            };
+        }
+
         private FormatEnum GetFormatByExtension(string ext)
         {
-            return ext switch
+            return ext.ToLower() switch
             {
-                ".jpg" or ".png" or ".bmp" or ".webp" => FormatEnum.Image,
+                ".jpg" or ".jpeg" or ".png" or ".bmp" or ".webp" or ".tiff" or ".tif" or ".gif" => FormatEnum.Image,
                 ".mp3" or ".wav" or ".flac" or ".aac" => FormatEnum.Audio,
                 ".mp4" or ".avi" or ".mov" or ".mkv" => FormatEnum.Video,
                 ".pdf" or ".docx" or ".txt" => FormatEnum.Document,
